@@ -338,11 +338,11 @@ window.onload = function () {
             clicked_time = jQuery(this).html();
             jQuery('.hour_clicked').removeClass("hour_clicked");
             jQuery(this).addClass("hour_clicked");
-            if (clicked_time == "7:30" || clicked_time == "8:30" || clicked_time == "16:30" || clicked_time == "17:30") {
-                hourly_coefficient = 1;
+            if (clicked_time == "7:30" || clicked_time == "8:30" || clicked_time == "16:30" || clicked_time == "17:30" || clicked_time == "18:30") {
+                hourly_coefficient = 0.85;
                 update_price();
             } else {
-                hourly_coefficient = 0.85;
+                hourly_coefficient = 1;
                 update_price();
             }
         });
