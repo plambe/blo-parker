@@ -12,6 +12,13 @@ body {
     font-size: 4vw;
 }
 
+#copyright {
+    font-size: 0.8em;
+    background-color: #5887d3;
+    color: white;
+    padding: 2vw;
+}
+
 #prices_container {
     color: white;
 }
@@ -76,6 +83,11 @@ body {
     color: white;
 }
 
+.hour_clicked {
+    background-color: #2e55a4;
+    color: white;
+}
+
 #map {
     width: 100vw;
     height: 60vh;
@@ -87,7 +99,7 @@ body {
     background-color: #2e55a4;
     text-align: center;
     width: 100vw;
-    height: 25vh;
+    height: 32vh;
 }
 
 @media screen and (orientation:portrait) {
@@ -143,7 +155,7 @@ body {
     #footer {
         order: 3;
         width: 100vw;
-        height: 25vh;
+        height: 32vh;
     }
 }
 
@@ -295,30 +307,52 @@ foreach ($median_prices as $key => $value) {
 
 ?>
 
-
+var hourly_coefficient = 0.85;
 
 window.onload = function () {
     var map_svg = Snap("#map_svg");
-    var centur = map_svg.select("#centur");
-    centur.animate({
-		fill: "#00a14b"
-	}, 1000);
+    var svg_animatables = [];
+    svg_animatables["Център"] = map_svg.selectAll("#centur .fillable");
+    svg_animatables["Оборище"] = map_svg.selectAll("#oborishte .fillable");
+    svg_animatables["Хладилника"] = map_svg.selectAll("#hladilnika .fillable");
+    svg_animatables["Лозенец"] = map_svg.selectAll("#lozenec .fillable");
+    svg_animatables["Сердика"] = map_svg.selectAll("#serdika .fillable");
+    svg_animatables["Зона Б18"] = map_svg.selectAll("#b18 .fillable");
+    svg_animatables["Зона Б19"] = map_svg.selectAll("#b19 .fillable");
+    svg_animatables["Зона Б5"] = map_svg.selectAll("#b5 .fillable");
+    svg_animatables["Яворов"] = map_svg.selectAll("#qvorov .fillable");
+    svg_animatables["Иван Вазов"] = map_svg.selectAll("#ivan_vazov .fillable");
+    
+    svg_animatables["Център"].animate({fill: '#f8941e'}, 1000, mina.ease);
+    svg_animatables["Център"].forEach(function(elem){elem.addClass('filled');});
     
     jQuery(document).ready(function(){
         jQuery('.hour').click(function(){
-            //console.log("ala-bala");
+            clicked_time = jQuery(this).html();
+            jQuery('.hour_clicked').removeClass("hour_clicked");
+            jQuery(this).addClass("hour_clicked");
+            if (clicked_time == "7:30" || clicked_time == "8:30" || clicked_time == "16:30" || clicked_time == "17:30") {
+                hourly_coefficient = 1;
+            } else {
+                hourly_coefficient = 0.85;
+            }
         });
         
         jQuery('#prices_container').html('Цена за 1 час паркиране в Центъра: ' + Math.round(median_prices['Център'] * 100) / 100);
         
         jQuery('select[name="price_selector"]').change(function(){
-            if (jQuery(this).val() == 'Сердика'){
+            var my_thing = jQuery(this).val();
+            if (my_thing == 'Сердика'){
                 jQuery('#prices_container').html('Цена за 1 час паркиране: ' + Math.round(median_prices['Център'] * 100) / 100);
-    //        } else if () {
-                
             } else {
-                jQuery('#prices_container').html('Цена за 1 час паркиране: ' + Math.round(median_prices[jQuery(this).val()] * 100) / 100);
+                jQuery('#prices_container').html('Цена за 1 час паркиране: ' + Math.round(median_prices[my_thing] * 100) / 100);
             }
+            map_svg.selectAll(".filled").forEach(function(elem){elem.stop();});
+            map_svg.selectAll(".filled").animate({fill: '#2e55a4'}, 1000, mina.ease);
+            svg_animatables[my_thing].forEach(function(elem){elem.stop();});
+            svg_animatables[my_thing].animate({fill: '#f8941e'}, 1000, mina.ease);
+            map_svg.selectAll(".filled").forEach(function(elem){elem.removeClass('filled');});
+            svg_animatables[my_thing].forEach(function(elem){elem.addClass('filled');});
         });
     });
 
@@ -680,7 +714,7 @@ window.onload = function () {
 </g>
 <g id="centur">
 	<g>
-		<path fill="#2E55A4" d="M454.5,613l48.9-17l-20.5-23.4l-35.1,23.2l-14.5-21.7l42.7-18.4l35-24.1l7.7-14.1l-19.8-4.9l-64.1-13.1
+		<path class="fillable" fill="#2E55A4" d="M454.5,613l48.9-17l-20.5-23.4l-35.1,23.2l-14.5-21.7l42.7-18.4l35-24.1l7.7-14.1l-19.8-4.9l-64.1-13.1
 			l4-19l15,3.7l14.4,2.3l5.2-27.3l-3.2-0.3l1.9-11.7l-1.3-2.8l7.3-5.3l2.2,4.2v10.7l23.4,0.7v-11.2h11.4v6.4l8.9,3.6l-1.9,9.8
 			l18.1,1.3l3.8-28.8l-12.2-3.8l5.8-16.1l10.7,7.4l1.9-2.6l15.6,9.1l2.2-4.8c2.2,1.3,11.2,6.5,16.4,8.2c5.3,1.8,14.2,2.9,15.4,3
 			l14.9,11.4l5.3,21l5.8,1c2,1.7,31.9,27,48.7,32.1c12.6,3.8,17.5,4.6,19.3,4.8v9.7l-0.8,8.9l-62.7-0.5v9.7l-1.9,9.1l47.9,13.4
@@ -729,23 +763,16 @@ window.onload = function () {
 		</g>
 	</g>
 </g>
-<g id="b18" display="none">
+<g id="b18">
 	<g display="inline">
-		<polygon fill="#2E55A4" points="454.5,483.3 458.5,458.8 472.2,460.1 467.5,485.4 		"/>
+		<polygon class="fillable" fill="#2E55A4" points="454.5,483.3 458.5,458.8 472.2,460.1 467.5,485.4 		"/>
 		<path fill="#FFFFFF" d="M458.9,459.3l12.8,1.2l-4.6,24.3l-11.9-1.9L458.9,459.3 M458.1,458.2l-4.1,25.5l13.9,2.2l5-26.3
 			L458.1,458.2L458.1,458.2z"/>
-	</g>
-	<g display="inline">
-		<polygon fill="#F7941E" points="454.5,483.3 458.5,458.8 472.2,460.1 467.5,485.4 		"/>
-		<g>
-			<path fill="#FFFFFF" d="M458.9,459.3l12.8,1.2l-4.6,24.3l-11.9-1.9L458.9,459.3 M458.1,458.2l-4.1,25.5l13.9,2.2l5-26.3
-				L458.1,458.2L458.1,458.2z"/>
-		</g>
 	</g>
 </g>
 <g id="ujen_park">
 	<g>
-		<polygon fill="#2E55A4" points="505.7,744.6 508.3,736 508.3,723.2 505.8,723 506.2,717.5 509.6,714.7 509.6,706.2 503.3,708.4 
+		<polygon class="fillable" fill="#2E55A4" points="505.7,744.6 508.3,736 508.3,723.2 505.8,723 506.2,717.5 509.6,714.7 509.6,706.2 503.3,708.4 
 			501.8,704.5 495.7,702.6 496.8,699.5 503.7,702.7 508.9,702.3 520.4,710.2 519.9,741.2 512.5,744.8 		"/>
 		<path fill="#FFFFFF" d="M497.1,700.2l6.3,3l0.2,0.1l0.3,0l4.9-0.4l11.1,7.6l-0.5,30.4l-7,3.4l-6-0.3l2.3-7.9l0-0.1v-0.1v-12.3
 			v-0.9l-0.9-0.1l-1.5-0.1l0.4-4.8l3-2.6l0.3-0.3v-0.5v-7.5v-1.4l-1.3,0.5l-5.2,1.8l-1.2-3.2l-0.2-0.4l-0.5-0.1l-5.4-1.7
@@ -765,7 +792,7 @@ window.onload = function () {
 </g>
 <g id="hladilnika">
 	<g>
-		<polygon fill="#2E55A4" points="515.9,808.8 515.8,804.6 534.6,792.4 540.4,752.7 610.8,723.2 615.4,734.3 603.9,740.4 
+		<polygon class="fillable" fill="#2E55A4" points="515.9,808.8 515.8,804.6 534.6,792.4 540.4,752.7 610.8,723.2 615.4,734.3 603.9,740.4 
 			603.9,750.4 576.9,762.2 576,767.1 594.5,779.7 593.7,786 589,792.2 594.5,796.3 594.3,809.9 		"/>
 		<path fill="#FFFFFF" d="M610.6,723.8l4.2,10.2l-10.8,5.8l-0.5,0.3v0.6v9.4l-26.5,11.5l-0.5,0.2l-0.1,0.5l-0.8,4.3l-0.1,0.6
 			l0.5,0.4l18,12.3l-0.7,5.8l-4.3,5.7l-0.6,0.8l0.8,0.6l4.9,3.7l-0.1,12.8l-77.4-1.1l-0.1-3.4l18.3-12l0.4-0.2l0.1-0.4l5.8-39.1
@@ -785,7 +812,7 @@ window.onload = function () {
 </g>
 <g id="b19">
 	<g>
-		<polygon fill="#2E55A4" points="434.6,500.8 434.7,500.5 463.5,506.4 462.6,513.2 457.7,519.9 423.8,541.6 		"/>
+		<polygon class="fillable" fill="#2E55A4" points="434.6,500.8 434.7,500.5 463.5,506.4 462.6,513.2 457.7,519.9 423.8,541.6 		"/>
 		<path fill="#FFFFFF" d="M435,501.1l27.9,5.7l-0.8,6.1l-4.8,6.6l-32.7,21L435,501.1 M434.3,500l-0.1,0.7L423,542.7l35.1-22.4l5-6.9
 			l1-7.3L434.3,500L434.3,500z"/>
 	</g>
@@ -799,7 +826,7 @@ window.onload = function () {
 </g>
 <g id="lozenec">
 	<g>
-		<polygon fill="#2E55A4" points="520.9,741.5 521.4,709.7 509.2,701.3 503.9,701.7 497.5,698.7 512.5,689.3 512,686 551.1,659.7 
+		<polygon class="fillable" fill="#2E55A4" points="520.9,741.5 521.4,709.7 509.2,701.3 503.9,701.7 497.5,698.7 512.5,689.3 512,686 551.1,659.7 
 			561.6,655.4 556.6,624.3 557.5,621 609.7,598 634.4,626 634.2,637 617.1,641.7 625.8,664.8 626.7,682.5 636.3,697 615.6,720.2 
 			610.9,722 540.6,751.6 540.6,751.3 520.1,758.7 		"/>
 		<path fill="#FFFFFF" d="M609.6,598.6l24.3,27.6l-0.1,10.4l-16.2,4.4l-1.1,0.3l0.4,1l8.4,22.5l0.9,17.5l0,0.3l0.2,0.2l9.3,14
@@ -823,7 +850,7 @@ window.onload = function () {
 </g>
 <g id="oborishte">
 	<g>
-		<polygon fill="#2E55A4" points="678,556.3 629.5,542.8 631.2,534.4 631.2,525.7 693.9,526.2 694.7,516.3 694.7,506.6 725.9,514.8 
+		<polygon class="fillable" fill="#2E55A4" points="678,556.3 629.5,542.8 631.2,534.4 631.2,525.7 693.9,526.2 694.7,516.3 694.7,506.6 725.9,514.8 
 			735.4,525.1 736.4,556.6 729.9,570.8 		"/>
 		<path fill="#FFFFFF" d="M695.2,507.2l30.4,8l9.3,10l0.9,31.3l-6.2,13.7l-51.6-14.4l-48-13.4l1.6-7.8l0-0.1v-0.1v-8.2l61.7,0.5
 			l0.9,0l0.1-0.9l0.9-9.4l0,0v0V507.2 M694.6,506.1c0,0-0.1,0-0.2,0c0,0-0.1,0-0.2,0v10.2l-0.9,9.4l-62.7-0.5v9.2l-1.8,8.7
@@ -841,7 +868,7 @@ window.onload = function () {
 </g>
 <g id="qvorov">
 	<g>
-		<path fill="#2E55A4" d="M644.1,569.9l32.1-10l1-2.8l52.3,14.6l-11.9,26l-6.4,6.2l0.4,0.4c9.3,7.9,23.4,20,24.7,21.6
+		<path class="fillable" fill="#2E55A4" d="M644.1,569.9l32.1-10l1-2.8l52.3,14.6l-11.9,26l-6.4,6.2l0.4,0.4c9.3,7.9,23.4,20,24.7,21.6
 			c0.1,0.6,1,2.8,8.7,14l-11.7,14.6L644.1,569.9z"/>
 		<path fill="#FFFFFF" d="M677.5,557.7L677.5,557.7l51.3,14.3l-11.6,25.4l-5.9,5.8l-0.8,0.8l0.8,0.7c8.8,7.4,22.8,19.5,24.5,21.4
 			c0.2,1,1.7,3.7,8.5,13.8l-11.1,13.9l-88.2-83.7l31.1-9.7l0.5-0.1l0.2-0.5L677.5,557.7 M676.9,556.5l-1.1,3l-32.7,10.2l90.2,85.6
@@ -859,7 +886,7 @@ window.onload = function () {
 </g>
 <g id="ivan_vazov">
 	<g>
-		<path fill="#2E55A4" d="M493.8,680.8l-0.1,0c0,0-4.9-0.3-7.5-0.3c-1.5,0-1.7,0.1-1.9,0.2c-0.5,0.3-1.3,1.6-1.7,2.3l-14.5,0.2
+		<path class="fillable" fill="#2E55A4" d="M493.8,680.8l-0.1,0c0,0-4.9-0.3-7.5-0.3c-1.5,0-1.7,0.1-1.9,0.2c-0.5,0.3-1.3,1.6-1.7,2.3l-14.5,0.2
 			l-6.9-31l0-0.2c9.4-5.1,21.7-11.6,27.9-14.6c3.5-1.7,12.1-2.6,25.5-2.6c4.3,0,9,0.1,14.1,0.3l-29.1,49.3L493.8,680.8z"/>
 		<path fill="#FFFFFF" d="M514.5,635.3c4,0,8.5,0.1,13.3,0.2l-28.4,48.1l-5.2-3.3l-0.2-0.1l-0.3,0c-0.2,0-4.9-0.3-7.5-0.3
 			c-1.6,0-1.9,0.1-2.2,0.3c-0.5,0.3-1.1,1.3-1.7,2.2l-13.8,0.1l-6.8-30.4c9.3-5,21.4-11.5,27.5-14.4
@@ -882,7 +909,7 @@ window.onload = function () {
 </g>
 <g id="b5">
 	<g>
-		<polygon fill="#2E55A4" points="471.6,548.5 472.8,543.4 469.5,542.8 471.2,537.2 465.8,535.5 460.4,524.8 463.6,513.5 
+		<polygon class="fillable" fill="#2E55A4" points="471.6,548.5 472.8,543.4 469.5,542.8 471.2,537.2 465.8,535.5 460.4,524.8 463.6,513.5 
 			464.5,506.6 498.7,513.6 517.2,518.2 510.3,530.9 476,554.6 		"/>
 		<path fill="#FFFFFF" d="M464.9,507.2l33.7,6.9l17.9,4.4l-6.6,12.1l-33.8,23.3l-4-5.5l1-4.3l0.2-1l-1-0.2l-2.2-0.4l1.5-4.7l0.3-1
 			l-1-0.3l-4.7-1.4l-5.3-10.4l3.1-11.1l0-0.1l0-0.1L464.9,507.2 M464.1,506l-1,7.3l-3.2,11.5l5.6,11.1l5.1,1.6l-1.8,5.7l3.3,0.6
@@ -900,7 +927,7 @@ window.onload = function () {
 </g>
 <g id="serdika">
 	<g>
-		<path fill="#2E55A4" d="M394.6,579.4c-0.3,0-0.6,0-0.8,0c-5.3-0.4-10.2-3.9-11.7-5.2l17.9-10l23.3-21.1l35.1-22.4l3.4-4.7l-2.5,9
+		<path class="fillable" fill="#2E55A4" d="M394.6,579.4c-0.3,0-0.6,0-0.8,0c-5.3-0.4-10.2-3.9-11.7-5.2l17.9-10l23.3-21.1l35.1-22.4l3.4-4.7l-2.5,9
 			l5.8,11.5l4.9,1.5l-1.8,5.8l3.4,0.6l-1,4.5l4.6,6.3l-42.7,18.4C431,573.8,402.5,579.4,394.6,579.4
 			C394.6,579.4,394.6,579.4,394.6,579.4z"/>
 		<path fill="#FFFFFF" d="M460.6,518.5l-1.7,6.1l-0.1,0.4l0.2,0.3l5.6,11.1l0.2,0.4l0.4,0.1l4.2,1.3l-1.5,4.8l-0.3,1.1l1.1,0.2
@@ -923,19 +950,6 @@ window.onload = function () {
 </svg>
     </div>
     <div id="footer">
-<?php /*         <select name="price_selector">
-            <option value="centar">Център</option>
-            <option value="oborishte">Оборище</option>
-            <option value="hladilnika">Хладилника</option>
-            <option value="lozenec">Лозенец</option>
-            <option value="serdika">Сердика</option>
-            <option value="b18">Зона Б18</option>
-            <option value="b19">Зона Б19</option>
-            <option value="b5">Зона Б5</option>
-            <option value="qvorov">Яворов</option>
-            <option value="ivan_vazov">Иван Вазов</option>
-        </select>
- */ ?>
         <select name="price_selector" id="price_selector_id">
             <option value="Център">Център</option>
             <option value="Оборище">Оборище</option>
@@ -951,6 +965,9 @@ window.onload = function () {
         <br />
         <br />
         <div id="prices_container"></div>
+        <br />
+        <br />
+        <div id="copyright">Приложението е направено от Отбор "БЛО" за Хакатон за София 2018</div>
     </div>
 </div>
 </body>
