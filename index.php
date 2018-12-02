@@ -327,14 +327,23 @@ window.onload = function () {
     svg_animatables["Център"].forEach(function(elem){elem.addClass('filled');});
     
     jQuery(document).ready(function(){
+        
+        var currently_selected_for_pricing = "Център";
+        
+        function update_price() {
+            jQuery('#prices_container').html('Цена за 1 час паркиране: ' + Math.round(median_prices[currently_selected_for_pricing] * hourly_coefficient * 100) / 100);
+        }
+        
         jQuery('.hour').click(function(){
             clicked_time = jQuery(this).html();
             jQuery('.hour_clicked').removeClass("hour_clicked");
             jQuery(this).addClass("hour_clicked");
             if (clicked_time == "7:30" || clicked_time == "8:30" || clicked_time == "16:30" || clicked_time == "17:30") {
                 hourly_coefficient = 1;
+                update_price();
             } else {
                 hourly_coefficient = 0.85;
+                update_price();
             }
         });
         
@@ -343,9 +352,13 @@ window.onload = function () {
         jQuery('select[name="price_selector"]').change(function(){
             var my_thing = jQuery(this).val();
             if (my_thing == 'Сердика'){
-                jQuery('#prices_container').html('Цена за 1 час паркиране: ' + Math.round(median_prices['Център'] * 100) / 100);
+                currently_selected_for_pricing = 'Център';
+                //jQuery('#prices_container').html('Цена за 1 час паркиране: ' + Math.round(median_prices['Център'] * 100) / 100);
+                update_price();
             } else {
-                jQuery('#prices_container').html('Цена за 1 час паркиране: ' + Math.round(median_prices[my_thing] * 100) / 100);
+                currently_selected_for_pricing = my_thing;
+                //jQuery('#prices_container').html('Цена за 1 час паркиране: ' + Math.round(median_prices[my_thing] * 100) / 100);
+                update_price();
             }
             map_svg.selectAll(".filled").forEach(function(elem){elem.stop();});
             map_svg.selectAll(".filled").animate({fill: '#2e55a4'}, 1000, mina.ease);
